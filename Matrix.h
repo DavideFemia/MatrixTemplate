@@ -19,6 +19,8 @@ private:
 public:
     Matrix(unsigned int rows, unsigned int columns);
     explicit Matrix(unsigned int dim);
+    Matrix(unsigned int rows, unsigned int columns, const std::vector<T>& v);
+    Matrix(unsigned int dim, const std::vector<T>& v);
     Matrix(const Matrix<T>& M);
     virtual ~Matrix();
 
@@ -54,7 +56,7 @@ template <typename T>
 Matrix<T>::Matrix(unsigned int rows, unsigned int columns)
         : rows(rows), columns(columns) {
     if (rows <= 0 || columns <= 0)
-        std::cerr<<"Invalid number of rows or columns";
+        std::cerr<<"Invalid number of rows or columns"<<std::endl;
 
     ptr = new T[rows * columns];
 
@@ -72,6 +74,34 @@ Matrix<T>::Matrix(unsigned int dim)
 
     for (int i = 0; i < rows * columns; i++)
         ptr[i] = 0;
+}
+
+template <typename T>
+Matrix<T>::Matrix(unsigned int rows, unsigned int columns, const std::vector<T>& v): rows(rows), columns(columns) {
+    if (rows <= 0 || columns <= 0)
+        std::cerr<<"Invalid number of rows or columns"<<std::endl;
+
+    ptr = new T[rows * columns];
+
+    if (v.size() != rows * columns)
+        std::cerr<<"Matrix and vector sizes are not equal"<<std::endl;
+
+    for (int i = 0; i < rows * columns; i++)
+        ptr[i] = v[i];
+}
+
+template <typename T>
+Matrix<T>::Matrix(unsigned int dim, const std::vector<T>& v): rows(dim), columns(dim) {
+    if (rows <= 0 || columns <= 0)
+        std::cerr<<"Invalid number of rows or columns"<<std::endl;
+
+    ptr = new T[rows * columns];
+
+    if (v.size() != rows * columns)
+        std::cerr<<"Matrix and vector sizes are not equal"<<std::endl;
+
+    for (int i = 0; i < rows * columns; i++)
+        ptr[i] = v[i];
 }
 
 template <typename T>
@@ -129,7 +159,7 @@ std::pair<unsigned int, unsigned int> Matrix<T>::size() const {
 template <typename T>
 Matrix<T> Matrix<T>::row(unsigned int row) const {
     if (row < 0 || row >= rows)
-        std::cerr<<"Invalid row index";
+        std::cerr<<"Invalid row index"<<std::endl;
 
     Matrix<T> r(1, columns);
     for (int i = 0; i < columns; i++)
@@ -142,7 +172,7 @@ Matrix<T> Matrix<T>::row(unsigned int row) const {
 template <typename T>
 Matrix<T> Matrix<T>::column(unsigned int column) const {
     if (column < 0 || column >= columns)
-        std::cerr<<"Invalid row index";
+        std::cerr<<"Invalid row index"<<std::endl;
 
     Matrix<T> c(rows, 1);
     for (int i = 0; i < rows; i++)
@@ -155,7 +185,7 @@ Matrix<T> Matrix<T>::column(unsigned int column) const {
 template <typename T>
 void Matrix<T>::setValue(const T &value, unsigned int row, unsigned int column) {
     if (row < 0 || row >= rows || column < 0 || column >= columns)
-        std::cerr<<"Invalid index";
+        std::cerr<<"Invalid index"<<std::endl;
     ptr[row * columns + column] = value;
 }
 
@@ -163,7 +193,7 @@ void Matrix<T>::setValue(const T &value, unsigned int row, unsigned int column) 
 template <typename T>
 T &Matrix<T>::getValue(unsigned int row, unsigned int column) const {
     if (row < 0 || row >= rows || column < 0 || column >= columns)
-        std::cerr<<"Invalid index";
+        std::cerr<<"Invalid index"<<std::endl;
     return ptr[row*columns + column];
 }
 
@@ -172,7 +202,7 @@ T &Matrix<T>::getValue(unsigned int row, unsigned int column) const {
 template <typename T>
 Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs) const {
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator +";
+        std::cerr<<"Invalid matrix size for operator +"<<std::endl;
 
     Matrix<T> sum(rows, columns);
 
@@ -185,7 +215,7 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs) const {
 template <typename T>
 Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs) const {
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator -";
+        std::cerr<<"Invalid matrix size for operator -"<<std::endl;
 
     Matrix<T> sub(rows, columns);
 
@@ -198,7 +228,7 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs) const {
 template <typename T>
 Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs) const {
     if (columns != rhs.rows)
-        std::cerr<<"Invalid matrix sizes for operator *";
+        std::cerr<<"Invalid matrix sizes for operator *"<<std::endl;
 
     Matrix<T> mul(rows, rhs.columns);
 
@@ -229,7 +259,7 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& rhs) {
 template <typename T>
 Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &rhs) {
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator +=";
+        std::cerr<<"Invalid matrix size for operator +="<<std::endl;
 
     for (int i = 0; i < rows * columns; i++)
         this->ptr[i] = this->ptr[i] + rhs.ptr[i];
@@ -240,7 +270,7 @@ Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &rhs) {
 template <typename T>
 Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &rhs) {
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator -=";
+        std::cerr<<"Invalid matrix size for operator -="<<std::endl;
 
     for (int i = 0; i < rows * columns; i++)
         this->ptr[i] = this->ptr[i] - rhs.ptr[i];
@@ -251,7 +281,7 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &rhs) {
 template <typename T>
 Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &rhs) {
     if (columns != rhs.rows)
-        std::cerr<<"Invalid matrix sizes for operator *";
+        std::cerr<<"Invalid matrix sizes for operator *"<<std::endl;
 
     T* mul = new T[rows * rhs.columns];
 
