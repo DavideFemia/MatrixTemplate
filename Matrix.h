@@ -9,6 +9,9 @@
 #include <vector>
 #include <iostream>
 
+#include "math_exception.h"
+#include "index_exception.h"
+
 template <typename T>
 class Matrix {
 private:
@@ -17,10 +20,10 @@ private:
     T *ptr;
 
 public:
-    Matrix(unsigned int rows, unsigned int columns);
-    explicit Matrix(unsigned int dim);
-    Matrix(unsigned int rows, unsigned int columns, const std::vector<T>& v);
-    Matrix(unsigned int dim, const std::vector<T>& v);
+    Matrix(unsigned int rows, unsigned int columns) throw(index_exception);
+    explicit Matrix(unsigned int dim) throw(index_exception);
+    Matrix(unsigned int rows, unsigned int columns, const std::vector<T>& v) throw(index_exception);
+    Matrix(unsigned int dim, const std::vector<T>& v) throw(index_exception);
     Matrix(const Matrix<T>& M);
     virtual ~Matrix();
 
@@ -30,21 +33,21 @@ public:
     unsigned int getColumns() const;
     std::pair<unsigned int, unsigned int> size() const;
 
-    Matrix<T> row(unsigned int row) const;
-    Matrix<T> column(unsigned int column) const;
+    Matrix<T> row(unsigned int row) const throw(index_exception);
+    Matrix<T> column(unsigned int column) const throw(index_exception);
 
-    void setValue(const T& value, unsigned int row, unsigned int column);
-    T& getValue(unsigned int row, unsigned int column) const;
+    void setValue(const T& value, unsigned int row, unsigned int column) throw(index_exception);
+    T& getValue(unsigned int row, unsigned int column) const throw(index_exception);
 
     Matrix<T>& operator=(const Matrix<T>& rhs);
 
-    Matrix<T> operator+(const Matrix<T>& rhs) const;
-    Matrix<T> operator-(const Matrix<T>& rhs) const;
-    Matrix<T> operator*(const Matrix<T>& rhs) const;
+    Matrix<T> operator+(const Matrix<T>& rhs) const throw(math_exception);
+    Matrix<T> operator-(const Matrix<T>& rhs) const throw(math_exception);
+    Matrix<T> operator*(const Matrix<T>& rhs) const throw(math_exception);
 
-    Matrix<T>& operator+=(const Matrix<T>& rhs);
-    Matrix<T>& operator-=(const Matrix<T>& rhs);
-    Matrix<T>& operator*=(const Matrix<T>& rhs);
+    Matrix<T>& operator+=(const Matrix<T>& rhs) throw(math_exception);
+    Matrix<T>& operator-=(const Matrix<T>& rhs) throw(math_exception);
+    Matrix<T>& operator*=(const Matrix<T>& rhs) throw(math_exception);
 
     bool operator==(const Matrix<T>& rhs) const;
     bool operator!=(const Matrix<T>& rhs) const;
@@ -53,10 +56,10 @@ public:
 
 
 template <typename T>
-Matrix<T>::Matrix(unsigned int rows, unsigned int columns)
+Matrix<T>::Matrix(unsigned int rows, unsigned int columns) throw(index_exception)
         : rows(rows), columns(columns) {
     if (rows <= 0 || columns <= 0)
-        std::cerr<<"Invalid number of rows or columns"<<std::endl;
+        throw index_exception("Invalid number of rows or columns");
 
     ptr = new T[rows * columns];
 
@@ -65,10 +68,10 @@ Matrix<T>::Matrix(unsigned int rows, unsigned int columns)
 }
 
 template <typename T>
-Matrix<T>::Matrix(unsigned int dim)
+Matrix<T>::Matrix(unsigned int dim) throw(index_exception)
         : rows(dim), columns(dim) {
     if (rows <= 0 || columns <= 0)
-        std::cerr<<"Invalid number of rows or columns";
+        throw index_exception("Invalid number of rows or columns");
 
     ptr = new T[rows * columns];
 
@@ -77,28 +80,30 @@ Matrix<T>::Matrix(unsigned int dim)
 }
 
 template <typename T>
-Matrix<T>::Matrix(unsigned int rows, unsigned int columns, const std::vector<T>& v): rows(rows), columns(columns) {
+Matrix<T>::Matrix(unsigned int rows, unsigned int columns, const std::vector<T>& v) throw(index_exception)
+        : rows(rows), columns(columns) {
     if (rows <= 0 || columns <= 0)
-        std::cerr<<"Invalid number of rows or columns"<<std::endl;
+        throw index_exception("Invalid number of rows or columns");
 
     ptr = new T[rows * columns];
 
     if (v.size() != rows * columns)
-        std::cerr<<"Matrix and vector sizes are not equal"<<std::endl;
+        throw index_exception("Matrix and vector sizes are not equal");
 
     for (int i = 0; i < rows * columns; i++)
         ptr[i] = v[i];
 }
 
 template <typename T>
-Matrix<T>::Matrix(unsigned int dim, const std::vector<T>& v): rows(dim), columns(dim) {
+Matrix<T>::Matrix(unsigned int dim, const std::vector<T>& v) throw(index_exception)
+        : rows(dim), columns(dim) {
     if (rows <= 0 || columns <= 0)
-        std::cerr<<"Invalid number of rows or columns"<<std::endl;
+        throw index_exception("Invalid number of rows or columns");
 
     ptr = new T[rows * columns];
 
     if (v.size() != rows * columns)
-        std::cerr<<"Matrix and vector sizes are not equal"<<std::endl;
+        throw index_exception("Matrix and vector sizes are not equal");
 
     for (int i = 0; i < rows * columns; i++)
         ptr[i] = v[i];
@@ -157,9 +162,9 @@ std::pair<unsigned int, unsigned int> Matrix<T>::size() const {
 
 // returns a vector representing the specified row of the matrix
 template <typename T>
-Matrix<T> Matrix<T>::row(unsigned int row) const {
+Matrix<T> Matrix<T>::row(unsigned int row) const throw(index_exception){
     if (row < 0 || row >= rows)
-        std::cerr<<"Invalid row index"<<std::endl;
+        throw index_exception("Invalid row index");
 
     Matrix<T> r(1, columns);
     for (int i = 0; i < columns; i++)
@@ -170,9 +175,9 @@ Matrix<T> Matrix<T>::row(unsigned int row) const {
 
 // returns a vector representing the specified column of the matrix
 template <typename T>
-Matrix<T> Matrix<T>::column(unsigned int column) const {
+Matrix<T> Matrix<T>::column(unsigned int column) const throw(index_exception) {
     if (column < 0 || column >= columns)
-        std::cerr<<"Invalid row index"<<std::endl;
+        throw index_exception("Invalid column index");
 
     Matrix<T> c(rows, 1);
     for (int i = 0; i < rows; i++)
@@ -183,26 +188,26 @@ Matrix<T> Matrix<T>::column(unsigned int column) const {
 
 // sets the value at given indexes
 template <typename T>
-void Matrix<T>::setValue(const T &value, unsigned int row, unsigned int column) {
+void Matrix<T>::setValue(const T &value, unsigned int row, unsigned int column) throw(index_exception){
     if (row < 0 || row >= rows || column < 0 || column >= columns)
-        std::cerr<<"Invalid index"<<std::endl;
+        throw index_exception("Invalid index");
     ptr[row * columns + column] = value;
 }
 
 // returns the value at given indexes
 template <typename T>
-T &Matrix<T>::getValue(unsigned int row, unsigned int column) const {
+T &Matrix<T>::getValue(unsigned int row, unsigned int column) const throw(index_exception){
     if (row < 0 || row >= rows || column < 0 || column >= columns)
-        std::cerr<<"Invalid index"<<std::endl;
+        throw index_exception("Invalid index");
     return ptr[row*columns + column];
 }
 
 //ARITHMETIC OPERATORS
 
 template <typename T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs) const {
+Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs) const throw(math_exception){
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator +"<<std::endl;
+        throw math_exception("Invalid matrix size for operator +");
 
     Matrix<T> sum(rows, columns);
 
@@ -213,9 +218,9 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs) const {
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs) const {
+Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs) const throw(math_exception){
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator -"<<std::endl;
+        throw math_exception("Invalid matrix size for operator -");
 
     Matrix<T> sub(rows, columns);
 
@@ -226,9 +231,9 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs) const {
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs) const {
+Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs) const throw(math_exception){
     if (columns != rhs.rows)
-        std::cerr<<"Invalid matrix sizes for operator *"<<std::endl;
+        throw math_exception("Invalid matrix sizes for operator *");
 
     Matrix<T> mul(rows, rhs.columns);
 
@@ -257,9 +262,9 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& rhs) {
 //BINARY OPERATOR
 
 template <typename T>
-Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &rhs) {
+Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &rhs) throw(math_exception){
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator +="<<std::endl;
+        throw math_exception("Invalid matrix size for operator +=");
 
     for (int i = 0; i < rows * columns; i++)
         this->ptr[i] = this->ptr[i] + rhs.ptr[i];
@@ -268,9 +273,9 @@ Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &rhs) {
 }
 
 template <typename T>
-Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &rhs) {
+Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &rhs) throw(math_exception){
     if (this->rows != rhs.rows || this->columns != rhs.columns)
-        std::cerr<<"Invalid matrix size for operator -="<<std::endl;
+        throw math_exception("Invalid matrix size for operator -=");
 
     for (int i = 0; i < rows * columns; i++)
         this->ptr[i] = this->ptr[i] - rhs.ptr[i];
@@ -279,9 +284,9 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &rhs) {
 }
 
 template <typename T>
-Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &rhs) {
+Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &rhs) throw(math_exception){
     if (columns != rhs.rows)
-        std::cerr<<"Invalid matrix sizes for operator *"<<std::endl;
+        throw math_exception("Invalid matrix sizes for operator *=");
 
     T* mul = new T[rows * rhs.columns];
 

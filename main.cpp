@@ -5,6 +5,16 @@ using namespace std;
 
 int main() {
     Matrix<float> C(2, 3, {3, 5, 1, 0, 4, 7});
+
+    try {
+        Matrix<float> B(3, 2, {1, 4, 1, 0, 2, 6,8});
+    }
+    catch(index_exception& e){
+        cout<<e.what()<<endl;
+    }
+
+    cout<<endl;
+
     Matrix<float> B(3, 2, {1, 4, 1, 0, 2, 6});
 
     cout << "C =" << endl;
@@ -47,6 +57,15 @@ int main() {
             cout << product.getValue(i, j) << " ";
         }
         cout << endl;
+    }
+
+    cout<<endl;
+
+    try {
+        product*=B;
+    }
+    catch(math_exception& e){
+        cout<<e.what()<<endl;
     }
 
     cout << endl;

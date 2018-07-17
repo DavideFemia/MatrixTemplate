@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(tests)
 
-set(SOURCE_FILES main.cpp Matrix.h)
+set(SOURCE_FILES main.cpp Matrix.h MatrixException.h math_exception.h index_exception.h)
 add_executable(LaboratoryProject ${SOURCE_FILES})
 add_library(core ${SOURCE_FILES})
 target_link_libraries(LaboratoryProject core)
